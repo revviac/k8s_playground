@@ -1,0 +1,6 @@
+[master]
+vbox16
+
+[workers]
+vbox32
+vbox48
