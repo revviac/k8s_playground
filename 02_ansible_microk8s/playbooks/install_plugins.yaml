@@ -1,13 +1,5 @@
 ---
 
-# - hosts: master, workers
-#   roles:
-#     - role: 'istvano.microk8s'
-#       vars:
-#         microk8s_plugins:
-#           dns: "1.1.1.1"
-#           dashboard: true
-
 - hosts: master
   become: true
   gather_facts: false

@@ -11,9 +11,13 @@
       command: microk8s add-node -l 60
       register: join_cluster
 
-    - name: Create persistent variable
+    # - name: Debug join_cluster variable 
+    #   debug:
+    #     msg: "{{ join_cluster.stdout_lines }}"
+
+    - name: Create a persistent variable
       set_fact:
-        join: "{{ join_cluster.stdout_lines[8] }} --worker"
+        join: "{{ join_cluster.stdout_lines[-1] }} --worker --skip-verify"
 
     # - name: Debug join command 
     #   debug:
@@ -25,8 +29,8 @@
         command: "{{ join }}"
 
 - hosts: workers
-  become: true
   gather_facts: false
+  become: true
 
   tasks:
     # On "invalid token":
