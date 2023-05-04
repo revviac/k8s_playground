@@ -1,0 +1,39 @@
+---
+
+- hosts: master
+  gather_facts: false
+  become: true
+  
+  tasks:
+    - name: Initialize the cluster
+      # Generate a token valid for 60 seconds
+      # This is necessary due to the latency between generating the token and actually using it
+      command: microk8s add-node -l 60
+      register: join_cluster
+
+    - name: Create persistent variable
+      set_fact:
+        join: "{{ join_cluster.stdout_lines[8] }} --worker"
+
+    # - name: Debug join command 
+    #   debug:
+    #     msg: "{{ join }}"
+
+    - name: Add intermediate host
+      add_host:
+        name: "join_holder"
+        command: "{{ join }}"
+
+- hosts: workers
+  become: true
+  gather_facts: false
+
+  tasks:
+    # On "invalid token":
+    # 1. Disabling --skip-verify can help
+    # 2. Use the ip of the control node machine (e.g. 192.168.x.x)
+    # 3. If the error says something along the line of "ubuntu is not the <ip> hostname", change
+    #    that machine's hostname by running `sudo hostname <hostname>`.
+    #    That hostname should match the hostname defined in the control node's /etc/hosts
+    - name: Join cluster
+      command: "{{ hostvars.join_holder.command }}" 
