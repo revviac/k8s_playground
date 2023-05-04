@@ -15,3 +15,8 @@
 ```
 7. Configure cluster: `ansible-playbook playbooks/configure_cluster.yaml`
 8. Install plugins: `ansible-playbook playbooks/install_plugins.yaml`
+9. (Optional) Add aliases (`~/.bash_aliases`, then `source ~/.bashrc`) to the manager node: 
+```
+microk8s='sudo microk8s'
+kubectl='sudo microk8s kubectl'
+```
