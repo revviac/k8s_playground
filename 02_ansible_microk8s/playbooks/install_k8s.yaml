@@ -1,0 +1,13 @@
+---
+
+- name: Setup k8s on all nodes
+  hosts: master, workers
+  become: true
+  
+  tasks:
+    - name: Install microk8s
+      snap:
+        name: microk8s
+        state: present
+        # Use --classic so that snap won't complain
+        classic: yes

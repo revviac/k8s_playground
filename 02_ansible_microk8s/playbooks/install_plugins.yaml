@@ -1,0 +1,23 @@
+---
+
+# - hosts: master, workers
+#   roles:
+#     - role: 'istvano.microk8s'
+#       vars:
+#         microk8s_plugins:
+#           dns: "1.1.1.1"
+#           dashboard: true
+
+- hosts: master
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Enable dns
+      command: microk8s enable dns
+    
+    - name: Enable dashboard
+      command: microk8s enable dashboard
+
+    - name: Enable ingress
+      command: microk8s enable ingress

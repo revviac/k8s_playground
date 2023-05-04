@@ -1,0 +1,11 @@
+---
+
+- name: Uninstall k8s on all nodes
+  hosts: master, workers
+  become: true
+  
+  tasks:
+    - name: Uninstall microk8s
+      snap:
+        name: microk8s
+        state: absent
