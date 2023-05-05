@@ -1,0 +1,17 @@
+---
+
+- hosts: master
+  gather_facts: true
+  become: true 
+  
+  tasks:
+    - name: Create /etc/k8s
+      command: mkdir -p /etc/k8s
+    
+    - name: Copy a namespace.yaml to the remote
+      copy:
+        src: ../namespace.yaml
+        dest: /etc/k8s/namespace.yaml
+
+    - name: Create a namespace
+      command: microk8s kubectl apply -f /etc/k8s/namespace.yaml

@@ -1,0 +1,23 @@
+---
+- hosts: master
+  gather_facts: false
+  become: true
+  
+  tasks:
+    # The following is an example of creating a self-signed TLS, but microk8s provides own k8s dashboard fake cert at kubernetes-dashboard-cert secret in kube-system
+    # - name: Create /etc/k8s/certs directory
+    #   command: mkdir -p /etc/k8s/certs
+
+    # - name: Create a self-signed certificate and put it in /etc/k8s/certs
+    #   command: openssl req -x509 -nodes -days 9999 -newkey rsa:2048 -keyout /etc/k8s/certs/ingress-tls.key -out /etc/k8s/certs/ingress-tls.crt -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=DashboardIngress"
+
+    # - name: Create a k8s secret in kube-system namespace
+    #   command: microk8s kubectl create secret tls dashboard-cert --namespace kube-system --key=/etc/k8s/certs/ingress-tls.key --cert=/etc/k8s/certs/ingress-tls.crt --save-config --dry-run=client -o yaml
+
+    - name: Copy dashboard ingress to the remote
+      copy:
+        src: ../dashboard/ingress.yaml
+        dest: /etc/k8s/dashboard-ingress.yaml
+
+    - name: Create dashboard-ingress 
+      command: microk8s kubectl apply -f /etc/k8s/dashboard-ingress.yaml

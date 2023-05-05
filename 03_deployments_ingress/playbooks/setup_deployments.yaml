@@ -1,0 +1,21 @@
+---
+
+- hosts: master
+  gather_facts: false
+  become: true
+  
+  tasks:
+    - name: Create /etc/k8s/deployments
+      command: mkdir -p /etc/k8s/deployments
+
+    - name: Copy deployments to the remote
+      copy:
+        src: ../deployments/
+        dest: /etc/k8s/deployments
+
+    # Hello World from https://github.com/RafaySystems/getstarted/blob/master/kubernetes/deployment.yaml 
+    # Hello World (nginx) from https://hub.docker.com/r/nginxdemos/hello/
+    - name: Create deployments from /etc/k8s/deployments 
+      command: microk8s kubectl apply -f /etc/k8s/deployments
+  
+  
