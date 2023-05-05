@@ -26,5 +26,19 @@ to their advertised IPs (192.168.50.XX) on **all nodes**:
 * Don't forget to pray to whatever god you believe in, and if you don't believe in any pray to k8s instead, maybe it'll have mercy on you.
 
 ## 3.1 Create a namespace for the test deployments
-This will create a `helloworld` namespace which will be used further. It can be created via a command or by passing a yaml file. 
-Run the following: `ansible-playbook playbooks/setup_namespace.yaml` 
+This will create a `helloworld` namespace which will be used further. It can be created via a command or by passing a yaml file.  
+
+Run the following: `ansible-playbook playbooks/setup_namespace.yaml`. You can check the new namespace using `kubectl get namespaces`.
+
+## 3.2 Create test deployments
+This will create `hello-world` and `myapp` deployments in the `helloworld` namespace. Each has its own service (named `(...)-svc`) and an ingress forwarding this service (named `(...)-ing`).  
+
+Run the following: `ansible-playbook playbooks/setup_deployments.yaml`. The apps are available at `myapp.k8s.cluster` and `helloworld.k8s.cluster`.
+
+## 3.3 Create dashboard ingress
+This will create an ingress for the dashboard, available at `dashboard.k8s.cluster`. The configuration for the dashboard ingress comes from the `dashboard/ingress.yaml` file. 
+
+Run `ansible-playbook playbooks/setup_dashboard.yaml`. If you want to use a self-signed certificate, uncomment first 3 tasks in the playbook, and make sure that the generated secret is used in the ingress config.
+The default name of the secret is `dashboard-cert`, available in the `kube-system` namespace.
+
+To get the login token, run `ansible-playbook/generate_dashboard_token.yaml`. This will generate a token available for 720 hours, and save it to `login_token.txt` file. Do not do this in production.

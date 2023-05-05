@@ -1,0 +1,18 @@
+---
+- hosts: master
+  gather_facts: false
+  become: true
+  
+  tasks:
+    - name: Create a login token
+      command: microk8s kubectl create token default --duration=720h
+      register: login_token
+    
+    - name: Print token 
+      debug:
+        msg: "{{ login_token.stdout_lines[0] }}"
+
+    - name: Save the login token to a file
+      become: false
+      local_action: copy content={{ login_token.stdout_lines[0] }} dest=../login_token.txt
+    
