@@ -1,0 +1,10 @@
+---
+- hosts: master,workers
+  gather_facts: false
+  become: true
+  
+  tasks:
+    - name: Install NFS client
+      apt:
+        name: nfs-common
+        state: present

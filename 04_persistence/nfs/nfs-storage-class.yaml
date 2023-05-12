@@ -1,0 +1,17 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: 192.168.50.32
+  # exports can be retrieved using showmount. If you don't have /export/k8s mount, you can use /export
+  share: /export/k8s
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  # If can't mount, try creating /tmp/pvc and running `sudo mount -t nfs -o hard,nfsvers=4 192.168.50.32:/export /tmp/pvc`
+  # If this doesn't mount, change the version til it does, you can check the mounts using `showmount -e 192.168.50.32`
+  - nfsvers=4

@@ -1,0 +1,16 @@
+---
+- hosts: master
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: create /etc/k8s/postgres
+      command: mkdir -p /etc/k8s/postgres
+
+    - name: Copy postgres.yaml to the remote
+      copy:
+        src: ../resources/postgres.yaml
+        dest: /etc/k8s/postgres/postgres.yaml
+
+    - name: Deploy postgres
+      command: microk8s kubectl apply -f /etc/k8s/postgres/postgres.yaml

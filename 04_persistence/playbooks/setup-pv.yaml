@@ -1,0 +1,13 @@
+# ---
+# - hosts: master
+#   gather_facts: false
+#   become: true
+
+#   tasks:
+#     - name: Copy pv-nfs.yaml to the remote
+#       copy:
+#         src: ../resources/pv-nfs.yaml
+#         dest: /etc/k8s/pv-nfs.yaml
+
+#     - name: Create a persistent volume (NFS)
+#       command: microk8s kubectl apply -f /etc/k8s/pv-nfs.yaml

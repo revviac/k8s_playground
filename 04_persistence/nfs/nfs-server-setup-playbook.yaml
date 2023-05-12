@@ -1,0 +1,13 @@
+---
+- hosts: vbox32
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Gather package facts
+      package_facts:
+        manager: apt
+
+    - name: Setup the NFS server
+      script: nfs-server-setup.sh
+      when: "'nfs-kernel-server' not in ansible_facts.packages"  

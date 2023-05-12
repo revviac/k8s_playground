@@ -1,0 +1,150 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: postgres
+---
+# PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-data
+  labels:
+    type: nfs
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    namespace: postgres
+    name: postgres-pvc
+  nfs:
+    # vbox32/nfs server ip
+    server: 192.168.50.32
+    # nfs server export path
+    path: /export/k8s
+---
+# PVC [Bind to existing volume]
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: postgres
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+# ---
+# # PVC [Storage class]
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: postgres-pvc
+#   namespace: postgres
+# spec:
+#   storageClassName: nfs-csi
+#   resources:
+#     requests:
+#       storage: 5Gi
+#   volumeMode: Filesystem
+#   accessModes:
+#     - ReadWriteMany
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: postgres
+  labels:
+    app: postgres
+data:
+  # User DB
+  POSTGRES_DB: testDB
+  # PGDATA at /data/k8s
+  PGDATA: /var/lib/postgresql/data/k8s
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: postgres
+spec:
+  # Deploy only one instance
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      # 
+      securityContext:
+        runAsUser: 999
+      containers:
+        - name: postgres
+          image: postgres:10.1
+          imagePullPolicy: "IfNotPresent"
+          # RAM [128Mb, 256Mb] and CPU between 100m to 200m
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: ".5Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 9000
+          # ENV START
+          env:
+           - name: POSTGRES_USER
+             valueFrom:
+               secretKeyRef:
+                 name: postgres-auth
+                 key: postgres-user
+           - name: POSTGRES_PASSWORD
+             valueFrom:
+               secretKeyRef:
+                 name: postgres-auth
+                 key: postgres-password
+           - name: POSTGRES_DB
+             valueFrom:
+               configMapKeyRef:
+                 name: postgres-config
+                 key: POSTGRES_DB
+           - name: PGDATA
+             valueFrom:
+               configMapKeyRef:
+                 name: postgres-config
+                 key: PGDATA
+          # ENV END
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+      # Use the volume claim created before
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+---
+# Service for port 5432
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-svc
+  namespace: postgres
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+  selector:
+   app: postgres

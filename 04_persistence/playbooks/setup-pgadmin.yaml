@@ -1,0 +1,13 @@
+---
+- hosts: master
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Copy pgadmin.yaml to the remote
+      copy:
+        src: ../resources/pgadmin.yaml
+        dest: /etc/k8s/postgres/pgadmin.yaml
+
+    - name: Deploy pgadmin
+      command: microk8s kubectl apply -f /etc/k8s/postgres/pgadmin.yaml
